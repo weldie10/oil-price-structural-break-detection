@@ -20,6 +20,8 @@ notebook>=6.5.0
 
 # Data Ingestion & Utilities
 requests>=2.28.0
+yfinance>=0.2.0
+pandas-datareader>=0.10.0
 
 # Backend
 Flask>=2.3.0
