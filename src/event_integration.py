@@ -11,6 +11,16 @@ from typing import Dict, List, Optional
 from datetime import timedelta
 import logging
 
+from .utils import (
+    validate_dataframe_not_empty,
+    validate_required_columns,
+    validate_positive_integer,
+    ensure_datetime_index,
+    calculate_price_statistics_in_window,
+    safe_divide,
+    parse_date_string
+)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,32 +64,29 @@ def align_events_with_prices(
     EventIntegrationError
         If integration fails or inputs are invalid
     """
-    # Input validation
-    if price_df is None or price_df.empty:
-        raise EventIntegrationError("Price DataFrame is None or empty")
+    # Input validation using utility functions
+    try:
+        validate_dataframe_not_empty(price_df, dataframe_name="Price DataFrame")
+        validate_dataframe_not_empty(event_df, dataframe_name="Event DataFrame")
+        validate_required_columns(price_df, required_columns=[price_column], dataframe_name="Price DataFrame")
+        validate_required_columns(event_df, required_columns=[event_date_column], dataframe_name="Event DataFrame")
+        validate_positive_integer(window_days, parameter_name="window_days")
+    except ValueError as e:
+        raise EventIntegrationError(str(e))
     
-    if event_df is None or event_df.empty:
-        raise EventIntegrationError("Event DataFrame is None or empty")
-    
-    if price_column not in price_df.columns:
-        raise EventIntegrationError(f"Price column '{price_column}' not found in price_df")
-    
-    if event_date_column not in event_df.columns:
-        raise EventIntegrationError(f"Event date column '{event_date_column}' not found in event_df")
-    
-    if window_days <= 0:
-        raise ValueError(f"window_days must be positive, got {window_days}")
-    
-    if not isinstance(price_df.index, pd.DatetimeIndex):
-        raise EventIntegrationError("Price DataFrame must have DatetimeIndex")
+    # Ensure price_df has DatetimeIndex using utility function
+    try:
+        price_df = ensure_datetime_index(price_df, index_name="price data")
+    except ValueError as e:
+        raise EventIntegrationError(str(e))
     
     try:
         event_analysis = event_df.copy()
         
-        # Ensure event dates are datetime
+        # Ensure event dates are datetime using utility function
         try:
             event_analysis[event_date_column] = pd.to_datetime(event_analysis[event_date_column])
-        except Exception as e:
+        except (ValueError, TypeError) as e:
             raise EventIntegrationError(f"Failed to convert event dates to datetime: {e}")
         
         # Initialize columns for price metrics
@@ -132,10 +139,13 @@ def align_events_with_prices(
                     event_analysis.at[idx, "price_after"] = price_after
                     event_analysis.at[idx, "price_change"] = price_after - price_before
                     
-                    if price_before != 0:
-                        event_analysis.at[idx, "price_change_pct"] = (
-                            (price_after - price_before) / price_before * 100
-                        )
+                    # Use safe_divide utility to avoid division by zero
+                    price_change_pct = safe_divide(
+                        (price_after - price_before) * 100,
+                        price_before,
+                        default=0.0
+                    )
+                    event_analysis.at[idx, "price_change_pct"] = price_change_pct
                     
                     event_analysis.at[idx, "max_price_window"] = window_prices.max()
                     event_analysis.at[idx, "min_price_window"] = window_prices.min()

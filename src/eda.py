@@ -15,6 +15,12 @@ from typing import Dict, Tuple, Optional
 import warnings
 import logging
 
+from .utils import (
+    validate_dataframe_not_empty,
+    validate_positive_integer,
+    safe_divide
+)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -91,13 +97,17 @@ def trend_analysis(df: pd.DataFrame, window: int = 30) -> Dict:
     EDAError
         If analysis fails or inputs are invalid
     """
-    if df is None or df.empty:
-        raise EDAError("DataFrame is None or empty")
+    # Validate DataFrame using utility function
+    try:
+        validate_dataframe_not_empty(df, dataframe_name="Input DataFrame")
+    except ValueError as e:
+        raise EDAError(str(e))
     
-    if not isinstance(df, pd.DataFrame):
-        raise EDAError(f"Expected DataFrame, got {type(df)}")
-    
-    if window <= 0:
+    # Validate window parameter using utility function
+    try:
+        validate_positive_integer(window, parameter_name="window")
+    except ValueError as e:
+        raise EDAError(str(e))
         raise ValueError(f"Window must be positive, got {window}")
     
     if window > len(df):

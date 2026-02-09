@@ -12,6 +12,14 @@ import warnings
 import logging
 from pathlib import Path
 
+from .utils import (
+    parse_date_string,
+    ensure_datetime_index,
+    validate_dataframe_not_empty,
+    validate_file_path,
+    validate_required_columns
+)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,10 +75,11 @@ def load_oil_price_data(
     if file_path is None:
         raise DataLoadingError("No file path provided. Please provide a file_path or implement online data source.")
     
-    # Validate file exists
-    file_path_obj = Path(file_path)
-    if not file_path_obj.exists():
-        raise DataLoadingError(f"File not found: {file_path}")
+    # Validate file exists using utility function
+    try:
+        file_path_obj = validate_file_path(file_path, must_exist=True)
+    except (ValueError, FileNotFoundError) as e:
+        raise DataLoadingError(str(e))
     
     try:
         # Load data
@@ -80,29 +89,28 @@ def load_oil_price_data(
         if df.empty:
             raise DataLoadingError("Loaded DataFrame is empty")
         
-        # Ensure date index
-        if not isinstance(df.index, pd.DatetimeIndex):
-            try:
-                df.index = pd.to_datetime(df.index)
-            except Exception as e:
-                raise DataLoadingError(f"Failed to convert index to datetime: {e}")
+        # Ensure date index using utility function
+        try:
+            df = ensure_datetime_index(df, index_name="price data")
+        except ValueError as e:
+            raise DataLoadingError(str(e))
         
-        # Filter by date range
+        # Filter by date range using utility function
         if start_date:
             try:
-                start_dt = pd.to_datetime(start_date)
+                start_dt = parse_date_string(start_date, parameter_name="start_date")
                 df = df[df.index >= start_dt]
                 logger.info(f"Filtered data from {start_date}")
-            except Exception as e:
-                raise DataLoadingError(f"Invalid start_date format: {e}")
+            except ValueError as e:
+                raise DataLoadingError(str(e))
         
         if end_date:
             try:
-                end_dt = pd.to_datetime(end_date)
+                end_dt = parse_date_string(end_date, parameter_name="end_date")
                 df = df[df.index <= end_dt]
                 logger.info(f"Filtered data until {end_date}")
-            except Exception as e:
-                raise DataLoadingError(f"Invalid end_date format: {e}")
+            except ValueError as e:
+                raise DataLoadingError(str(e))
         
         if df.empty:
             raise DataLoadingError("No data remaining after date filtering")
@@ -147,14 +155,11 @@ def validate_data(df: pd.DataFrame) -> Dict:
     DataValidationError
         If DataFrame is invalid or empty
     """
-    if df is None:
-        raise DataValidationError("DataFrame is None")
-    
-    if not isinstance(df, pd.DataFrame):
-        raise DataValidationError(f"Expected DataFrame, got {type(df)}")
-    
-    if df.empty:
-        raise DataValidationError("DataFrame is empty")
+    # Validate DataFrame using utility function
+    try:
+        validate_dataframe_not_empty(df, dataframe_name="Input DataFrame")
+    except ValueError as e:
+        raise DataValidationError(str(e))
     
     try:
         report = {
@@ -225,8 +230,11 @@ def preprocess_data(df: pd.DataFrame, handle_missing: str = "forward_fill") -> p
     DataValidationError
         If preprocessing fails
     """
-    if df is None or df.empty:
-        raise DataValidationError("Cannot preprocess empty or None DataFrame")
+    # Validate DataFrame using utility function
+    try:
+        validate_dataframe_not_empty(df, dataframe_name="Input DataFrame")
+    except ValueError as e:
+        raise DataValidationError(str(e))
     
     valid_methods = ["forward_fill", "backward_fill", "interpolate", "drop"]
     if handle_missing not in valid_methods:
@@ -273,10 +281,11 @@ def load_event_data(file_path: str = "data/raw/oil_market_events.csv") -> pd.Dat
     DataLoadingError
         If file cannot be loaded or is invalid
     """
-    file_path_obj = Path(file_path)
-    
-    if not file_path_obj.exists():
-        raise DataLoadingError(f"Event data file not found: {file_path}")
+    # Validate file path using utility function
+    try:
+        file_path_obj = validate_file_path(file_path, must_exist=True)
+    except (ValueError, FileNotFoundError) as e:
+        raise DataLoadingError(str(e))
     
     try:
         logger.info(f"Loading event data from {file_path}")
@@ -285,11 +294,11 @@ def load_event_data(file_path: str = "data/raw/oil_market_events.csv") -> pd.Dat
         if df.empty:
             raise DataLoadingError("Event data file is empty")
         
-        # Validate required columns
-        required_columns = ["event_date"]
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        if missing_columns:
-            raise DataLoadingError(f"Missing required columns: {missing_columns}")
+        # Validate required columns using utility function
+        try:
+            validate_required_columns(df, required_columns=["event_date"], dataframe_name="Event data")
+        except ValueError as e:
+            raise DataLoadingError(str(e))
         
         logger.info(f"Successfully loaded {len(df)} events")
         return df
