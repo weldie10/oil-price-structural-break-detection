@@ -280,7 +280,26 @@ def load_event_data(file_path: str = "data/raw/oil_market_events.csv") -> pd.Dat
     
     try:
         logger.info(f"Loading event data from {file_path}")
-        df = pd.read_csv(file_path, parse_dates=["event_date"])
+        # Use quoting to handle commas in fields
+        # Try with on_bad_lines for pandas >= 1.3, fallback for older versions
+        try:
+            df = pd.read_csv(
+                file_path, 
+                parse_dates=["event_date"],
+                quotechar='"',
+                quoting=1,  # QUOTE_ALL
+                on_bad_lines='skip'  # pandas >= 1.3
+            )
+        except TypeError:
+            # Fallback for older pandas versions
+            df = pd.read_csv(
+                file_path, 
+                parse_dates=["event_date"],
+                quotechar='"',
+                quoting=1,  # QUOTE_ALL
+                error_bad_lines=False,  # pandas < 1.3
+                warn_bad_lines=True
+            )
         
         if df.empty:
             raise DataLoadingError("Event data file is empty")
