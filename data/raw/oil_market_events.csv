@@ -1,0 +1,22 @@
+event_date,event_type,event_description,impact_type,severity,source_notes
+2001-09-11,Terrorism,9/11 terrorist attacks on United States,Demand Shock,High,Global economic uncertainty and reduced air travel
+2003-03-20,Geopolitical,US-led invasion of Iraq begins,Supply Shock,High,Major oil producer conflict
+2005-08-29,Natural Disaster,Hurricane Katrina hits US Gulf Coast,Supply Shock,High,Disrupted US oil production and refining
+2008-07-11,Market,Oil prices reach all-time high of $147/barrel,Market,High,Speculative bubble and strong demand
+2008-09-15,Economic,Lehman Brothers bankruptcy - Global Financial Crisis,Demand Shock,Very High,Massive demand destruction
+2009-01-01,OPEC,OPEC cuts production by 4.2 million bpd,Supply Shock,High,Response to financial crisis price collapse
+2011-02-15,Geopolitical,Arab Spring - Libyan civil war begins,Supply Shock,High,Libya production disruption
+2014-06-20,OPEC,OPEC decides not to cut production despite oversupply,Supply Shock,High,Price war strategy
+2014-11-27,OPEC,"OPEC maintains production levels, leading to price collapse",Supply Shock,High,Continued oversupply
+2015-07-14,Iran Deal,Iran nuclear deal signed - sanctions relief,Supply Shock,Medium,Expected increase in Iranian exports
+2016-11-30,OPEC,OPEC+ agrees to cut production by 1.8 million bpd,Supply Shock,High,First major OPEC+ cooperation
+2018-05-08,Geopolitical,"US withdraws from Iran nuclear deal, reimposes sanctions",Supply Shock,High,Iranian exports reduced
+2019-09-14,Geopolitical,Drone attacks on Saudi Aramco facilities,Supply Shock,High,5% of global supply temporarily disrupted
+2020-03-06,OPEC,OPEC+ production cut talks collapse,Supply Shock,High,Price war between Saudi Arabia and Russia
+2020-03-11,Pandemic,COVID-19 declared global pandemic,Demand Shock,Very High,Unprecedented demand destruction
+2020-04-20,Market,US oil futures go negative for first time,Market,Very High,Storage capacity crisis
+2020-04-12,OPEC,OPEC+ agrees to record 9.7 million bpd production cut,Supply Shock,Very High,Response to COVID-19 demand collapse
+2021-11-04,OPEC,OPEC+ maintains gradual production increase plan,Supply Shock,Medium,Gradual supply restoration
+2022-02-24,Geopolitical,Russia invades Ukraine,Supply Shock,Very High,Sanctions and supply disruptions
+2022-10-05,OPEC,OPEC+ announces 2 million bpd production cut,Supply Shock,High,Response to price decline concerns
+2023-10-07,Geopolitical,Israel-Hamas conflict begins,Geopolitical,Medium,Regional tensions and supply concerns

@@ -30,19 +30,37 @@ ENV/
 .ipynb_checkpoints
 *.ipynb_checkpoints
 
-# Data
-data/raw/*
+# Data (keep structure, ignore actual data files)
+data/raw/*.csv
+data/raw/*.xlsx
+data/raw/*.json
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/raw/oil_market_events.csv
 
 # Models
 models/*
 !models/.gitkeep
 
-# Reports
+# Reports (keep structure, ignore generated files)
 reports/figures/*
 !reports/figures/.gitkeep
+
+# Frontend (React)
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
 
 # IDE
 .vscode/
@@ -50,10 +68,13 @@ reports/figures/*
 *.swp
 *.swo
 *~
+*.sublime-project
+*.sublime-workspace
 
 # OS
 .DS_Store
 Thumbs.db
+.DS_Store?
 
 # Logs
 *.log
@@ -62,6 +83,7 @@ logs/
 # Environment variables
 .env
 .env.local
+.env.*.local
 
 # MLflow
 mlruns/
@@ -70,3 +92,13 @@ mlruns/
 .coverage
 htmlcov/
 .pytest_cache/
+.tox/
+.hypothesis/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
